@@ -13,16 +13,16 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<Autor, AutorDTO>();
 
-        //CreateMap<Autor, AutorDTOConLibros>()
-        //    .ForMember(autorDTO => autorDTO.Libros, opciones => opciones.MapFrom(MapAutorDTOLibros));
+        CreateMap<Autor, AutorDTOConLibros>()
+            .ForMember(autorDTO => autorDTO.Libros, opciones => opciones.MapFrom(MapAutorDTOLibros));
 
-        CreateMap<LibroCreacionDTO, Libro>();
-        //    .ForMember(libro => libro.AutoresLibros, opciones => opciones.MapFrom(MapAutoresLibros));
+        CreateMap<LibroCreacionDTO, Libro>()
+            .ForMember(libro => libro.AutoresLibros, opciones => opciones.MapFrom(MapAutoresLibros));
 
-        CreateMap<Libro, LibroDTO>().ReverseMap();
+        CreateMap<Libro, LibroDTO>();
 
-        //CreateMap<Libro, LibroDTOConAutores>()
-        //    .ForMember(libroDTO => libroDTO.Autores, opciones => opciones.MapFrom(MapLibroDTOAutores));
+        CreateMap<Libro, LibroDTOConAutores>()
+            .ForMember(libroDTO => libroDTO.Autores, opciones => opciones.MapFrom(MapLibroDTOAutores));
 
         //CreateMap<LibroPatchDTO, Libro>().ReverseMap();
 
@@ -30,53 +30,54 @@ public class AutoMapperProfiles : Profile
         CreateMap<Comentario, ComentarioDTO>();
     }
 
-    //private List<LibroDTO> MapAutorDTOLibros(Autor autor, AutorDTO autorDTO)
-    //{
-    //    var resultado = new List<LibroDTO>();
+    private List<LibroDTO> MapAutorDTOLibros(Autor autor, AutorDTO autorDTO)
+    {
+        var resultado = new List<LibroDTO>();
 
-    //    if (autor.AutoresLibros == null) { return resultado; }
+        if (autor.AutoresLibros == null) { return resultado; }
 
-    //    foreach (var autorLibro in autor.AutoresLibros)
-    //    {
-    //        resultado.Add(new LibroDTO()
-    //        {
-    //            Id = autorLibro.LibroId,
-    //            Titulo = autorLibro.Libro.Titulo
-    //        });
-    //    }
+        foreach (var autorLibro in autor.AutoresLibros)
+        {
+            resultado.Add(new LibroDTO()
+            {
+                Id = autorLibro.LibroId,
+                Titulo = autorLibro.Libro.Titulo
+            });
+        }
 
-    //    return resultado;
-    //}
+        return resultado;
+    }
 
-    //private List<AutorDTO> MapLibroDTOAutores(Libro libro, LibroDTO libroDTO)
-    //{
-    //    var resultado = new List<AutorDTO>();
+    private List<AutorDTO> MapLibroDTOAutores(Libro libro, LibroDTO libroDTO)
+    {
+        var resultado = new List<AutorDTO>();
 
-    //    if (libro.AutoresLibros == null) { return resultado; }
+        if (libro.AutoresLibros == null) { return resultado; }
 
-    //    foreach (var autorlibro in libro.AutoresLibros)
-    //    {
-    //        resultado.Add(new AutorDTO()
-    //        {
-    //            Id = autorlibro.AutorId,
-    //            Nombre = autorlibro.Autor.Nombre
-    //        });
-    //    }
+        foreach (var autorlibro in libro.AutoresLibros)
+        {
+            resultado.Add(new AutorDTO()
+            {
+                Id = autorlibro.AutorId,
+                Nombre = autorlibro.Autor.Nombre
+            });
+        }
 
-    //    return resultado;
-    //}
+        return resultado;
+    }
 
-    //private List<AutorLibro> MapAutoresLibros(LibroCreacionDTO libroCreacionDTO, Libro libro)
-    //{
-    //    var resultado = new List<AutorLibro>();
+    private List<AutorLibro> MapAutoresLibros(LibroCreacionDTO libroCreacionDTO, Libro libro)
+    {
+        var resultado = new List<AutorLibro>();
 
-    //    if (libroCreacionDTO.AutoresIds == null) { return resultado; }
+        if (libroCreacionDTO.AutoresIds == null) { return resultado; }
 
-    //    foreach (var autorId in libroCreacionDTO.AutoresIds)
-    //    {
-    //        resultado.Add(new AutorLibro() { AutorId = autorId });
-    //    }
+        foreach (var autorId in libroCreacionDTO.AutoresIds)
+        {
+            resultado.Add(new AutorLibro() { AutorId = autorId }); // EF core agrega sola el LibroId xq al 
+            // momento de crear un libro ( q es cuando se ocupa esto ) no tengo la id todavia.
+        }
 
-    //    return resultado;
-    //}
+        return resultado;
+    }
 }

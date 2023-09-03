@@ -34,17 +34,19 @@ namespace WebAPIAutores.Controllers
 
         //////////////////////////////////////////
         /////////////////////////////////////////////
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<AutorDTO>> Get(int id)
+        [HttpGet("{id:int}", Name = "obtenerAutor")]
+        public async Task<ActionResult<AutorDTOConLibros>> Get(int id)
         {
-            var autor = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);
+            var autor = await context.Autores.Include(a => a.AutoresLibros)
+                                             .ThenInclude(al => al.Libro)
+                                             .FirstOrDefaultAsync(a => a.Id == id);
 
             if (autor == null)
             {
                 return NotFound();
             }
 
-            return mapper.Map<AutorDTO>(autor);
+            return mapper.Map<AutorDTOConLibros>(autor);
         }
 
         //////////////////////////////////////////
@@ -58,6 +60,7 @@ namespace WebAPIAutores.Controllers
         }
 
         //////////////////////////////////////////
+        ///
         /////////////////////////////////////////////
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] AutorCreacionDTO autorCreacionDTO)
@@ -75,7 +78,9 @@ namespace WebAPIAutores.Controllers
             context.Autores.Add(autor);
             await context.SaveChangesAsync();
 
-            return Ok();
+            var autorDTO = mapper.Map<AutorDTO>(autor);
+
+            return CreatedAtRoute("obtenerAutor", new { id = autor.Id }, autorDTO);
         }
 
         //////////////////////////////////////////

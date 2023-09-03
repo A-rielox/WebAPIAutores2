@@ -1,4 +1,6 @@
-﻿namespace WebApiAutores.DTOs;
+﻿using WebAPIAutores.DTOs;
+
+namespace WebApiAutores.DTOs;
 
 public class AutorDTO
 {
