@@ -24,7 +24,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Libro, LibroDTOConAutores>()
             .ForMember(libroDTO => libroDTO.Autores, opciones => opciones.MapFrom(MapLibroDTOAutores));
 
-        //CreateMap<LibroPatchDTO, Libro>().ReverseMap();
+        CreateMap<LibroPatchDTO, Libro>().ReverseMap();
 
         CreateMap<ComentarioCreacionDTO, Comentario>();
         CreateMap<Comentario, ComentarioDTO>();

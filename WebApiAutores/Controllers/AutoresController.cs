@@ -13,14 +13,24 @@ namespace WebAPIAutores.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
+        private readonly IConfiguration configuration;
 
-        public AutoresController(ApplicationDbContext context, IMapper mapper)
+        public AutoresController(ApplicationDbContext context, IMapper mapper, IConfiguration configuration)
         {
             this.context = context;
             this.mapper = mapper;
+            this.configuration = configuration;
         }
 
 
+
+        //////////////////////////////////////////
+        /////////////////////////////////////////////
+        [HttpGet("configuraciones")]
+        public ActionResult<string> ObtenerConfiguracion()
+        {
+            return configuration["apellido"];
+        }
 
         //////////////////////////////////////////
         /////////////////////////////////////////////
@@ -86,13 +96,8 @@ namespace WebAPIAutores.Controllers
         //////////////////////////////////////////
         /////////////////////////////////////////////
         [HttpPut("{id:int}")] // api/autores/1 
-        public async Task<ActionResult> Put(Autor autor, int id)
+        public async Task<ActionResult> Put(AutorCreacionDTO autorCreacionDTO, int id)
         {
-            if (autor.Id != id)
-            {
-                return BadRequest("El id del autor no coincide con el id de la URL");
-            }
-
             var existe = await context.Autores.AnyAsync(x => x.Id == id);
 
             if (!existe)
@@ -100,10 +105,13 @@ namespace WebAPIAutores.Controllers
                 return NotFound();
             }
 
+            var autor = mapper.Map<Autor>(autorCreacionDTO);
+            autor.Id = id;
+
             context.Update(autor);
             await context.SaveChangesAsync();
 
-            return Ok();
+            return NoContent();
         }
 
         //////////////////////////////////////////
@@ -120,7 +128,8 @@ namespace WebAPIAutores.Controllers
 
             context.Remove(new Autor() { Id = id });
             await context.SaveChangesAsync();
-            return Ok();
+
+            return NoContent();
         }
     }
 }
