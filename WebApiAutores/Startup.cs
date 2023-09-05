@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
+using WebApiAutores.Servicios;
 using WebAPIAutores.Filtros;
 using WebAPIAutores.Middlewares;
 
@@ -87,6 +88,26 @@ public class Startup
         services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+        // autorizacion basada en claims p' poner los admin en el token
+        // el usuario va a tener que tener el claim "esAdmin"
+        services.AddAuthorization(opciones =>
+        {//                   nombre de la policy                      la key q va en la claim
+            opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin"));
+        });
+
+
+        services.AddCors(opciones =>
+        {
+            opciones.AddDefaultPolicy(builder =>
+            {//                          url permitida
+                builder.WithOrigins("https://www.apirequest.io").AllowAnyMethod().AllowAnyHeader();
+            });
+        });
+
+        services.AddDataProtection(); // p' lo de encriptacion
+
+        services.AddTransient<HashService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
@@ -104,6 +125,10 @@ public class Startup
         app.UseHttpsRedirection();
 
         app.UseRouting();
+
+
+        app.UseCors();
+
 
         app.UseAuthorization(); //       *
 

@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using WebApiAutores.DTOs;
+using WebApiAutores.Servicios;
 
 namespace WebApiAutores.Controllers;
 
@@ -18,82 +19,77 @@ public class CuentasController : ControllerBase
     private readonly UserManager<IdentityUser> userManager;
     private readonly IConfiguration configuration;
     private readonly SignInManager<IdentityUser> signInManager;
-    //private readonly HashService hashService;
+    private readonly HashService hashService;
     private readonly IDataProtector dataProtector;
 
     public CuentasController(UserManager<IdentityUser> userManager,
         IConfiguration configuration,
         SignInManager<IdentityUser> signInManager,
-        IDataProtectionProvider dataProtectionProvider
-        //HashService hashService
+        IDataProtectionProvider dataProtectionProvider,
+        HashService hashService
         )
     {
         this.userManager = userManager;
         this.configuration = configuration;
         this.signInManager = signInManager;
-        //this.hashService = hashService;
+        this.hashService = hashService;
         dataProtector = dataProtectionProvider.CreateProtector("valor_unico_y_quizas_secreto");
     }
 
 
-
-
+    //////////////////////////////////////////
+    /////////////////////////////////////////////
+    [HttpGet("hash/{textoPlano}")]
+    public ActionResult RealizarHash(string textoPlano)
+    {
+        var resultado1 = hashService.Hash(textoPlano);
+        var resultado2 = hashService.Hash(textoPlano);
+        return Ok(new
+        {
+            textoPlano = textoPlano,
+            Hash1 = resultado1,
+            Hash2 = resultado2
+        });
+    }
 
 
     //////////////////////////////////////////
     /////////////////////////////////////////////
-    //[HttpGet("hash/{textoPlano}")]
-    //public ActionResult RealizarHash(string textoPlano)
-    //{
-    //    var resultado1 = hashService.Hash(textoPlano);
-    //    var resultado2 = hashService.Hash(textoPlano);
-    //    return Ok(new
-    //    {
-    //        textoPlano = textoPlano,
-    //        Hash1 = resultado1,
-    //        Hash2 = resultado2
-    //    });
-    //}
+    [HttpGet("encriptar")]
+    public ActionResult Encriptar()
+    {
+        var textoPlano = "Felipe Gavilán";
+        var textoCifrado = dataProtector.Protect(textoPlano);
+        var textoDesencriptado = dataProtector.Unprotect(textoCifrado);
 
-
-
-    //////////////////////////////////////////
-    /////////////////////////////////////////////
-    //[HttpGet("encriptar")]
-    //public ActionResult Encriptar()
-    //{
-    //    var textoPlano = "Felipe Gavilán";
-    //    var textoCifrado = dataProtector.Protect(textoPlano);
-    //    var textoDesencriptado = dataProtector.Unprotect(textoCifrado);
-
-    //    return Ok(new
-    //    {
-    //        textoPlano = textoPlano,
-    //        textoCifrado = textoCifrado,
-    //        textoDesencriptado = textoDesencriptado
-    //    });
-    //}
+        return Ok(new
+        {
+            textoPlano = textoPlano,
+            textoCifrado = textoCifrado,
+            textoDesencriptado = textoDesencriptado
+        });
+    }
 
 
     //////////////////////////////////////////
     /////////////////////////////////////////////
-    //[HttpGet("encriptarPorTiempo")]
-    //public ActionResult EncriptarPorTiempo()
-    //{
-    //    var protectorLimitadoPorTiempo = dataProtector.ToTimeLimitedDataProtector();
+    [HttpGet("encriptarPorTiempo")]
+    public ActionResult EncriptarPorTiempo()
+    {
+        var protectorLimitadoPorTiempo = dataProtector.ToTimeLimitedDataProtector();
 
-    //    var textoPlano = "Felipe Gavilán";
-    //    var textoCifrado = protectorLimitadoPorTiempo.Protect(textoPlano, lifetime: TimeSpan.FromSeconds(5));
-    //    Thread.Sleep(6000);
-    //    var textoDesencriptado = protectorLimitadoPorTiempo.Unprotect(textoCifrado);
+        var textoPlano = "Felipe Gavilán";
+        var textoCifrado = protectorLimitadoPorTiempo.Protect(textoPlano, lifetime: TimeSpan.FromSeconds(5));
+        Thread.Sleep(6000);
+        var textoDesencriptado = protectorLimitadoPorTiempo.Unprotect(textoCifrado);
 
-    //    return Ok(new
-    //    {
-    //        textoPlano = textoPlano,
-    //        textoCifrado = textoCifrado,
-    //        textoDesencriptado = textoDesencriptado
-    //    });
-    //}
+        return Ok(new
+        {
+            textoPlano = textoPlano,
+            textoCifrado = textoCifrado,
+            textoDesencriptado = textoDesencriptado
+        });
+    }
 
 
 
@@ -142,20 +138,20 @@ public class CuentasController : ControllerBase
 
     //////////////////////////////////////////
     /////////////////////////////////////////////
-    //[HttpGet("RenovarToken")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<ActionResult<RespuestaAutenticacion>> Renovar()
-    //{
-    //    var emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault();
-    //    var email = emailClaim.Value;
-    //    var credencialesUsuario = new CredencialesUsuario()
-    //    {
-    //        Email = email
-    //    };
+    [HttpGet("RenovarToken")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]  // tiene q checar q tenga token valido en 1er lugar
+    public async Task<ActionResult<RespuestaAutenticacion>> Renovar()
+    {
+        var emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault();
+        var email = emailClaim.Value;
 
-    //    return await ConstruirToken(credencialesUsuario);
-    //}
+        var credencialesUsuario = new CredencialesUsuario()
+        {
+            Email = email
+        };
 
+        return await ConstruirToken(credencialesUsuario);
+    }
 
 
     //////////////////////////////////////////
@@ -191,22 +187,22 @@ public class CuentasController : ControllerBase
 
     //////////////////////////////////////////
     /////////////////////////////////////////////
-    //[HttpPost("HacerAdmin")]
-    //public async Task<ActionResult> HacerAdmin(EditarAdminDTO editarAdminDTO)
-    //{
-    //    var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
-    //    await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "1"));
-    //    return NoContent();
-    //}
+    [HttpPost("HacerAdmin")]
+    public async Task<ActionResult> HacerAdmin(EditarAdminDTO editarAdminDTO)
+    {
+        var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
+        await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "1"));
+
+        return NoContent();
+    }
 
 
-    //////////////////////////////////////////
-    /////////////////////////////////////////////
-    //[HttpPost("RemoverAdmin")]
-    //public async Task<ActionResult> RemoverAdmin(EditarAdminDTO editarAdminDTO)
-    //{
-    //    var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
-    //    await userManager.RemoveClaimAsync(usuario, new Claim("esAdmin", "1"));
-    //    return NoContent();
-    //}
+    [HttpPost("RemoverAdmin")]
+    public async Task<ActionResult> RemoverAdmin(EditarAdminDTO editarAdminDTO)
+    {
+        var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
+        await userManager.RemoveClaimAsync(usuario, new Claim("esAdmin", "1"));
+
+        return NoContent();
+    }
 }
