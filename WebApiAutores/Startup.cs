@@ -32,7 +32,7 @@ public class Startup
                 options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
         // instalar Microsoft.AspNetCore.Authentication.JwtBearer
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(); //           * p' ocupar [Authorize] en controladores
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(); //    * p' ocupar [Authorize] en controladores
 
         //services.AddEndpointsApiExplorer();
 
@@ -57,7 +57,7 @@ public class Startup
 
         app.UseRouting();
 
-        app.UseAuthorization(); //           *
+        app.UseAuthorization(); //       *
 
         app.UseEndpoints(endpoints =>
         {
