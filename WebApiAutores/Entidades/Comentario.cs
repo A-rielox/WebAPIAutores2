@@ -1,4 +1,6 @@
-﻿namespace WebApiAutores.Entidades;
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace WebApiAutores.Entidades;
 
 public class Comentario
 {
@@ -8,4 +10,8 @@ public class Comentario
 
 
     public Libro Libro { get; set; }
+
+    // p' relacion usuario-comentario 1-many
+    public string UsuarioId { get; set; }
+    public IdentityUser Usuario { get; set; }
 }
